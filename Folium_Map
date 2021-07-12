@@ -1,0 +1,27 @@
+import folium
+import numpy as np
+from vega_datasets import data as vds
+
+m = folium.Map()
+
+lat_interval = 10
+lon_interval = 10
+lat_trans = 1
+long_trans = 5
+grid = []
+grid_trans = []
+
+for lat in range(-90, 90, lat_interval):
+    grid.append([[lat, -180],[lat, 180]])
+
+for lon in range(-180, 181, lon_interval):
+    grid.append([[-90, lon],[90, lon]])
+
+
+for g in grid:
+    folium.PolyLine(g, color="black",weight=0.5, opacity=0.5).add_to(m)
+    
+    
+folium.PolyLine([[0,-180],[0,180]],tooltip="Equator", color="green", weight=2).add_to(m) # equator
+folium.PolyLine([[-90,-0],[90,0]], color="green", weight=1.8).add_to(m) # prime meridian
+m.save("Test2.html")
