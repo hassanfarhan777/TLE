@@ -1,0 +1,77 @@
+from beyond.io.tle import Tle
+from beyond.dates import Date
+import matplotlib.pyplot as plt
+import numpy as np
+
+tle = Tle("""ESTCUBE 1             
+1 39161U 13021C   21190.16115675  .00000203  00000-0  39683-4 0  9990
+2 39161  97.9386 270.8533 0010880  82.4555 277.7898 14.72497522438947""")
+
+tle2 = Tle("""ISS (ZARYA)
+1 25544U 98067A   20331.01187177  .00003392  00000-0  69526-4 0  9990
+2 25544  51.6456 267.7478 0001965  82.1336  12.7330 15.49066632257107""")
+
+orb_est = tle.orbit() # orbit for EstCube
+orb_iss = tle2.orbit() # orbit for ISS
+
+
+# Tables containing the positions of the ground track
+latitudes, longitudes = [], []
+prev_lon, prev_lat = None, None
+
+# Condition for plotting
+period = orb_est.infos.period
+start = Date.now()
+stop = 2 * period
+step = period/100
+
+for point in orb_est.ephemeris(start=start, stop=stop, step=step):
+
+    # Conversion to earth rotating frame
+    point.frame = 'ITRF'
+
+    # Conversion from cartesian to spherical coordinates (range, latitude, longitude)
+    point.form = 'spherical'
+
+    # Conversion from radians to degrees
+    lon, lat = np.degrees(point[1:3])
+    
+    # Creation of multiple segments in order to not have a ground track
+    # doing impossible paths
+    if prev_lon is None:
+        lons = []
+        lats = []
+        longitudes.append(lons)
+        latitudes.append(lats)
+    elif orb_est.i < np.pi /2 and (np.sign(prev_lon) == 1 and np.sign(lon) == -1):
+        lons.append(lon + 360)
+        lats.append(lat)
+        lons = [prev_lon - 360]
+        lats = [prev_lat]
+        longitudes.append(lons)
+        latitudes.append(lats)
+    elif orb_est.i > np.pi/2 and (np.sign(prev_lon) == -1 and np.sign(lon) == 1):
+        lons.append(lon - 360)
+        lats.append(lat)
+        lons = [prev_lon + 360]
+        lats = [prev_lat]
+        longitudes.append(lons)
+        latitudes.append(lats)
+
+    lons.append(lon)
+    lats.append(lat)
+    prev_lon = lon
+    prev_lat = lat
+
+
+
+plt.xlim(-180,180)      # longitude limit
+plt.xlabel('Longitude')
+plt.ylim(-90,90)        # latitute limit
+plt.ylabel('Latitude')
+
+for lons, lats in zip(longitudes, latitudes):
+    plt.plot(lons, lats,'black', linestyle="--", linewidth=1.5)
+
+plt.grid()
+plt.show()
