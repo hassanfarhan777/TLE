@@ -3,10 +3,10 @@ This Python script calculates and visualizes the ground track of the ESTCube 1 s
 
 ## Requirements
 - Python 3.x
-- beyond library (install via pip: pip install beyond)
-- matplotlib (install via pip: pip install matplotlib)
-- numpy (install via pip: pip install numpy)
-- folium (install via pip: pip install folium)
+- Beyond library (install via pip: pip install beyond)
+- Matplotlib (install via pip: pip install matplotlib)
+- NumPy (install via pip: pip install numpy)
+- Folium (install via pip: pip install folium)
 
 ## Usage
 Ensure all dependencies are installed.
